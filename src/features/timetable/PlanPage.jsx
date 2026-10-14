@@ -120,10 +120,13 @@ function PlanPage() {
       const notes = (w.weekly ? "<span class='nt'>أداءات وتقييمات أسبوعية</span>" : "") +
         (w.notes || []).map(n => `<span class='nt k-${n.k}'>${n.t}</span>`).join("")
       
-      // Determine week classes
+      // Determine week classes - compare by ID instead of object reference
+      const isCurWeek = curWeek && curWeek.id === w.id
+      const isNextWeek = !curWeek && nextWeek && nextWeek.id === w.id
+      
       let weekClasses = 'wk'
-      if (curWeek === w) weekClasses += ' cur'
-      else if (!curWeek && nextWeek === w) weekClasses += ' next'
+      if (isCurWeek) weekClasses += ' cur'
+      else if (isNextWeek) weekClasses += ' next'
       else {
         // Check if past
         const s = D(w.d)
@@ -131,6 +134,9 @@ function PlanPage() {
         const now = new Date()
         if (e <= now) weekClasses += ' past'
       }
+      
+      // Determine tag text
+      const tagText = isCurWeek ? 'هذا الأسبوع' : isNextWeek ? 'القادم' : ''
       
       elements.push(
         <article 
@@ -141,6 +147,7 @@ function PlanPage() {
           style={{ '--d': delay }}
         >
           {head}
+          {tagText && <span className="wk-tag">{tagText}</span>}
           <div className="blk bk">
             <div className="bl2">
               <span className="lab">الكتاب</span>

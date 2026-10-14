@@ -47,7 +47,7 @@ function TimetableGrid({ items, dimmedItems, today, currentPeriod, onOpenPlan })
           <tbody>
             {DAYS.map((d, i) => (
               <tr key={i}>
-                <th className="day" scope="row" data-day={i}>
+                <th className={`day ${today === i ? 'today' : ''}`} scope="row" data-day={i}>
                   <span className="dn">{d}</span>
                   <span className="dd">{dates[i]}</span>
                 </th>
