@@ -1,0 +1,654 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>جدول أ/ عمر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Google Calendar / Material 3 feel. App bar, two tabs (weekly timetable / second-secondary plan). Timetable tab: plan banner, grade + subject filters, hairline week grid (cards per day on phones). Plan tab: key dates, then a month-by-month timeline of weekly cards. Colours: pink = primary grades 4-6, blue = preparatory grades 7-9, green = programming, amber = specialization, purple = financial literacy. */
+:root {
+  --bg: #f6f8fc;
+  --card: #ffffff;
+  --fg: #1f1f1f;
+  --muted: #5f6368;
+  --line: #dadce0;
+  --hover: #f1f3f4;
+  --primary: #1a73e8;
+  --primary-c: #d3e3fd;
+  --on-primary-c: #041e49;
+  --now: #d93025;
+  --stripe: #f1f3f4;
+  --elev: 0 1px 2px rgba(60, 64, 67, .30), 0 2px 6px 2px rgba(60, 64, 67, .15);
+  --pri-bg: #fcd5e8;  --pri-fg: #7a1141;  --pri-dot: #d01884;
+  --prep-bg: #d3e3fd; --prep-fg: #0b3a8f; --prep-dot: #1a73e8;
+  --prog-bg: #c4eed0; --prog-fg: #0b4b1f; --prog-dot: #188038;
+  --str-bg: #fde8a4;  --str-fg: #5c3a00;  --str-dot: #f9ab00;
+  --fin-bg: #ecd9fb;  --fin-fg: #4a1f78;  --fin-dot: #9334e6;
+  --exam-bg: #fad2cf; --exam-fg: #8c1d18; --exam-dot: #d93025;
+  --font: "Cairo", "Segoe UI", Tahoma, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131314; --card: #1e1f20; --fg: #e3e3e3; --muted: #9aa0a6; --line: #3c4043; --hover: #2a2b2d;
+    --primary: #8ab4f8; --primary-c: #1f3a64; --on-primary-c: #d3e3fd; --now: #f28b82; --stripe: #252627;
+    --elev: 0 1px 3px rgba(0, 0, 0, .6), 0 4px 8px 3px rgba(0, 0, 0, .35);
+    --pri-bg: #5c1a3d;  --pri-fg: #ffb8dc;  --pri-dot: #ff8bcb;
+    --prep-bg: #1f3a64; --prep-fg: #a8c7fa; --prep-dot: #8ab4f8;
+    --prog-bg: #17402a; --prog-fg: #a8dab5; --prog-dot: #81c995;
+    --str-bg: #4d3a07;  --str-fg: #fdd663;  --str-dot: #fdd663;
+    --fin-bg: #3d2459;  --fin-fg: #d7aefb;  --fin-dot: #c58af9;
+    --exam-bg: #5c2724; --exam-fg: #f6aea9; --exam-dot: #f28b82;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131314; --card: #1e1f20; --fg: #e3e3e3; --muted: #9aa0a6; --line: #3c4043; --hover: #2a2b2d;
+  --primary: #8ab4f8; --primary-c: #1f3a64; --on-primary-c: #d3e3fd; --now: #f28b82; --stripe: #252627;
+  --elev: 0 1px 3px rgba(0, 0, 0, .6), 0 4px 8px 3px rgba(0, 0, 0, .35);
+  --pri-bg: #5c1a3d;  --pri-fg: #ffb8dc;  --pri-dot: #ff8bcb;
+  --prep-bg: #1f3a64; --prep-fg: #a8c7fa; --prep-dot: #8ab4f8;
+  --prog-bg: #17402a; --prog-fg: #a8dab5; --prog-dot: #81c995;
+  --str-bg: #4d3a07;  --str-fg: #fdd663;  --str-dot: #fdd663;
+  --fin-bg: #3d2459;  --fin-fg: #d7aefb;  --fin-dot: #c58af9;
+  --exam-bg: #5c2724; --exam-fg: #f6aea9; --exam-dot: #f28b82;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); padding-inline: 16px; padding-block: 20px 40px; line-height: 1.5; overflow-x: hidden; }
+.page { max-width: 1080px; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; }
+.view { display: flex; flex-direction: column; gap: 18px; }
+button { font-family: inherit; }
+
+.t-pri  { --bg-t: var(--pri-bg);  --fg-t: var(--pri-fg);  --dot: var(--pri-dot); }
+.t-prep { --bg-t: var(--prep-bg); --fg-t: var(--prep-fg); --dot: var(--prep-dot); }
+.t-prog { --bg-t: var(--prog-bg); --fg-t: var(--prog-fg); --dot: var(--prog-dot); }
+.t-str  { --bg-t: var(--str-bg);  --fg-t: var(--str-fg);  --dot: var(--str-dot); }
+.t-fin  { --bg-t: var(--fin-bg);  --fg-t: var(--fin-fg);  --dot: var(--fin-dot); }
+.k-exam { --bg-t: var(--exam-bg); --fg-t: var(--exam-fg); --dot: var(--exam-dot); }
+.k-hol  { --bg-t: var(--str-bg);  --fg-t: var(--str-fg);  --dot: var(--str-dot); }
+.k-meet { --bg-t: var(--primary-c); --fg-t: var(--on-primary-c); --dot: var(--primary); }
+.k-info { --bg-t: var(--prog-bg); --fg-t: var(--prog-fg); --dot: var(--prog-dot); }
+
+/* app bar */
+.bar { display: flex; align-items: center; gap: 14px; animation: slide .5s cubic-bezier(.2, .7, .2, 1) both; }
+.logo { flex: none; width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; background: var(--primary-c); color: var(--on-primary-c); }
+.titles { min-width: 0; flex: 1; }
+.titles h1 { margin: 0; font-size: 24px; font-weight: 500; line-height: 1.25; }
+.titles p { margin: 0; font-size: 14px; color: var(--muted); }
+.today-btn { flex: none; height: 40px; padding: 0 20px; border-radius: 20px; border: 1px solid var(--line); background: transparent; color: var(--fg); font-size: 14px; font-weight: 500; cursor: pointer; transition: background .15s, box-shadow .15s; }
+.today-btn:hover:not(:disabled) { background: var(--hover); }
+.today-btn:active:not(:disabled) { box-shadow: var(--elev); }
+.today-btn:disabled { opacity: .45; cursor: default; }
+
+/* tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); animation: fade .5s .05s both; }
+.tab { position: relative; height: 48px; padding: 0 22px; background: none; border: 0; border-radius: 12px 12px 0 0; color: var(--muted); font-size: 15px; font-weight: 500; cursor: pointer; transition: color .2s, background .2s; }
+.tab:hover { background: var(--hover); }
+.tab[aria-selected="true"] { color: var(--primary); }
+.tab::after { content: ""; position: absolute; inset-inline: 14px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--primary); transform: scaleX(0); transition: transform .25s cubic-bezier(.2, .7, .2, 1); }
+.tab[aria-selected="true"]::after { transform: scaleX(1); }
+
+/* plan banner */
+.pbanner { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); animation: rise .6s .05s cubic-bezier(.2, .7, .2, 1) both; }
+.pb-ic { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--str-bg); color: var(--str-fg); }
+.pb-tx { min-width: 0; flex: 1; }
+.pb-k { display: block; font-size: 12.5px; color: var(--muted); }
+.pb-m { display: block; font-size: 15px; font-weight: 600; }
+.pb-s { display: block; font-size: 13.5px; color: var(--muted); }
+.link-btn { flex: none; height: 36px; padding: 0 16px; border: 0; border-radius: 18px; background: transparent; color: var(--primary); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+.link-btn:hover { background: var(--primary-c); }
+
+/* filters */
+.filters { display: flex; flex-direction: column; gap: 10px; }
+.frow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.flabel { min-width: 44px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.fgrp { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 4px; border-radius: 14px; background: var(--hover); }
+.chip { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 14px; font-weight: 500; cursor: pointer; transition: background .2s, color .2s, border-color .2s, transform .15s; animation: pop .4s cubic-bezier(.3, 1.4, .5, 1) both; animation-delay: var(--d); }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--dot); }
+.chip .n { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+.chip.stage-chip { font-weight: 700; }
+.chip:hover { background: var(--hover); }
+.chip:active { transform: scale(.96); }
+.chip[aria-pressed="true"] { background: var(--bg-t, var(--primary-c)); color: var(--fg-t, var(--on-primary-c)); border-color: transparent; }
+.chip[aria-pressed="true"] .n { color: inherit; opacity: .8; }
+.chip[aria-pressed="true"] .dot { display: none; }
+.chip[aria-pressed="true"]::before { content: "✓"; font-weight: 700; }
+.empty { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 16px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); font-size: 14px; animation: fade .3s both; }
+
+/* week grid */
+.board { overflow: hidden; border: 1px solid var(--line); border-radius: 24px; background: var(--card); box-shadow: var(--elev); animation: rise .6s .1s cubic-bezier(.2, .7, .2, 1) both; }
+table { width: calc(100% + 2px); margin: -1px; border-collapse: collapse; table-layout: fixed; }
+th, td { border: 1px solid var(--line); padding: 0; text-align: center; vertical-align: middle; }
+thead th { padding: 12px 2px 10px; font-weight: 500; }
+thead .pn { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--hover); font-size: 15px; font-weight: 500; }
+thead .tm { display: block; margin-top: 4px; font-size: clamp(10px, 1.3vw, 12px); color: var(--muted); direction: ltr; white-space: nowrap; font-variant-numeric: tabular-nums; }
+thead .bl { display: block; font-size: 13px; color: var(--muted); line-height: 30px; }
+th.day { width: 11%; }
+th.brk, td.brk { width: 6.5%; background: repeating-linear-gradient(135deg, var(--stripe) 0 7px, transparent 7px 14px); }
+tbody th.day { padding: 8px 2px; font-weight: 400; }
+.dn { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+.dd { display: inline-grid; place-items: center; width: 40px; height: 40px; margin-top: 2px; border-radius: 50%; font-size: 20px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.today .dn { color: var(--primary); }
+.today .dd { background: var(--primary); color: var(--card); font-weight: 500; }
+.dd.bump { animation: bump .6s cubic-bezier(.3, 1.6, .5, 1); }
+
+td { position: relative; height: 112px; }
+td.free { animation: fade .5s both; animation-delay: var(--d); }
+td.lesson { animation: rise .5s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--d); }
+.slot { position: absolute; inset: 4px; border-radius: 10px; padding: 8px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; background: var(--bg-t); color: var(--fg-t); transition: opacity .25s, filter .25s, box-shadow .2s, transform .2s; }
+.slot:hover { box-shadow: var(--elev); transform: translateY(-1px); }
+[data-plan] { cursor: pointer; }
+.s { font-size: 16px; font-weight: 600; line-height: 1.35; }
+.c { font-size: 13px; font-weight: 500; direction: ltr; unicode-bidi: isolate; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.k { font-size: 12px; opacity: .85; }
+.dim { opacity: .18; filter: grayscale(1); }
+
+/* running now */
+.live { display: none; position: absolute; top: 11px; right: 11px; z-index: 2; width: 9px; height: 9px; border-radius: 50%; background: var(--now); }
+.live::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--now); animation: ping 1.8s ease-out infinite; }
+.lesson.now .live, .row.now .live { display: block; }
+.lesson.now .slot { outline: 2px solid var(--now); outline-offset: 0; }
+
+/* narrow screens: a card per day */
+.days { display: none; }
+.day-card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px 12px 12px; display: flex; flex-direction: column; gap: 10px; animation: rise .55s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--d); scroll-margin-top: 12px; }
+.day-card h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 500; }
+.day-card .dd { margin: 0; width: 38px; height: 38px; font-size: 18px; background: var(--hover); }
+.day-card.today .dd { background: var(--primary); color: var(--card); }
+.day-card .tag { display: none; padding: 2px 10px; border-radius: 999px; background: var(--primary-c); color: var(--on-primary-c); font-size: 12px; font-weight: 500; }
+.day-card.today .tag { display: inline-block; }
+.day-card .count { margin-inline-start: auto; font-size: 13px; font-weight: 400; color: var(--muted); }
+.day-card ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.row { position: relative; display: grid; grid-template-columns: 78px 1fr; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--bg-t); color: var(--fg-t); transition: opacity .25s, filter .25s; }
+.row .when { display: flex; flex-direction: column; align-items: center; line-height: 1.25; }
+.row .when b { font-size: 22px; font-weight: 500; }
+.row .when span { font-size: 11px; direction: ltr; white-space: nowrap; opacity: .85; font-variant-numeric: tabular-nums; }
+.row .what { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; min-width: 0; }
+.row.now { outline: 2px solid var(--now); }
+.row .live { top: 10px; right: auto; left: 10px; }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.notes > div { min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; font-size: 14px; animation: rise .6s .3s cubic-bezier(.2, .7, .2, 1) both; }
+.notes h2 { margin: 0 0 4px; font-size: 15px; font-weight: 500; }
+.notes p { margin: 0; color: var(--muted); }
+.notes bdi { font-weight: 500; font-variant-numeric: tabular-nums; color: var(--fg); }
+
+/* plan tab */
+.phead h2 { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.3; }
+.phead p { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+.sec { margin: 0; font-size: 14px; font-weight: 600; color: var(--muted); }
+.kds { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.kd { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); animation: rise .5s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--d); }
+.kd .dt { flex: none; width: 54px; height: 54px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; background: var(--bg-t); color: var(--fg-t); }
+.kd .dt b { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; direction: ltr; }
+.kd .dt span { font-size: 11px; }
+.kd .tx { min-width: 0; }
+.kd .tx b { display: block; font-size: 14px; font-weight: 500; line-height: 1.4; }
+.kd .tx span { font-size: 12.5px; color: var(--muted); }
+
+.tl { display: flex; flex-direction: column; gap: 12px; }
+.termh { margin: 8px 0 0; font-size: 18px; font-weight: 600; }
+.mon { margin: 6px 0 0; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.mon::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.wk { position: relative; display: grid; grid-template-columns: 124px minmax(0, 1fr) minmax(0, 1.3fr); gap: 12px 18px; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; scroll-margin-top: 16px; transition: box-shadow .2s, border-color .2s; animation: rise .5s cubic-bezier(.2, .7, .2, 1) both; animation-delay: var(--d); }
+.wk:hover { box-shadow: var(--elev); }
+.wk.cur { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.wk.next { border-color: var(--str-dot); }
+.wk.past .wk-h, .wk.past .blk { opacity: .6; }
+.wk-h { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.wk-n { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--str-bg); color: var(--str-fg); font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.wk-l { font-size: 13px; color: var(--muted); }
+.wk-d { font-size: 15px; font-weight: 600; }
+.wk-tag { display: none; padding: 1px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.wk.cur .wk-tag { display: inline-block; background: var(--primary-c); color: var(--on-primary-c); }
+.wk.next .wk-tag { display: inline-block; background: var(--str-bg); color: var(--str-fg); }
+.blk { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.bk { --bg-t: var(--primary-c); --fg-t: var(--on-primary-c); }
+.pf { --bg-t: var(--prog-bg); --fg-t: var(--prog-fg); }
+.bl2 { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.lab { padding: 2px 10px; border-radius: 999px; font-weight: 600; background: var(--bg-t); color: var(--fg-t); }
+.per { color: var(--muted); direction: ltr; unicode-bidi: isolate; }
+.blk p { margin: 0; font-size: 15px; line-height: 1.55; }
+.blk p.u { font-weight: 600; }
+.chs { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chs li { display: inline-flex; align-items: baseline; gap: 6px; padding: 5px 10px; border-radius: 10px; background: var(--hover); font-size: 13.5px; }
+.chs li b { color: var(--prog-fg); font-weight: 700; font-variant-numeric: tabular-nums; }
+.wk-notes { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+.nt { padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--bg-t, var(--hover)); color: var(--fg-t, var(--muted)); }
+.wk.blank { grid-template-columns: 124px 1fr; }
+.wk.blank .mute, .wk.missing .mute { margin: 0; align-self: center; color: var(--muted); font-size: 14px; }
+.wk.missing { grid-template-columns: 1fr; border-style: dashed; background: transparent; }
+.src { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .board { display: none; }
+  .days { display: grid; gap: 12px; }
+  .titles h1 { font-size: 21px; }
+  .tab { flex: 1; padding: 0 8px; }
+  .wk, .wk.blank { grid-template-columns: 1fr; }
+  .wk-h { flex-direction: row; align-items: center; gap: 10px; }
+  .pbanner { flex-wrap: wrap; }
+  .pbanner .link-btn { margin-inline-start: auto; }
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes slide { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes ping { from { transform: scale(1); opacity: .7; } to { transform: scale(3); opacity: 0; } }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+</style>
+
+<main class="page" id="page">
+  <header class="bar">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5zm2 4h5v5H7z"/></svg>
+    </span>
+    <div class="titles">
+      <h1>جدول أ/ عمر</h1>
+      <p id="sub"></p>
+    </div>
+    <button class="today-btn" id="todayBtn" type="button">اليوم</button>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="العرض">
+    <button class="tab" role="tab" id="tab-tt" aria-selected="true" aria-controls="view-tt" type="button">الجدول الأسبوعي</button>
+    <button class="tab" role="tab" id="tab-plan" aria-selected="false" aria-controls="view-plan" type="button">خطة تانية ثانوي</button>
+  </nav>
+
+  <!-- timetable -->
+  <section class="view" id="view-tt" role="tabpanel" aria-labelledby="tab-tt">
+    <div class="pbanner" id="banner"></div>
+
+    <div class="filters" id="filters" aria-label="تصفية الجدول"></div>
+    <div class="empty" id="empty" role="status" hidden></div>
+
+    <div class="board" dir="ltr">
+      <table id="tt">
+        <caption style="position:absolute;left:-9999px">الجدول الأسبوعي للمعلم عمر</caption>
+      </table>
+    </div>
+
+    <div class="days" id="days"></div>
+
+    <section class="notes">
+      <div>
+        <h2>التشعيب</h2>
+        <p>في حصص التشعيب يتفرّق طلاب ثانية ثانوي حسب الشعبة التي اختاروها. حصص التشعيب لـ <bdi dir="ltr">11/A</bdi> و <bdi dir="ltr">11/B</bdi> تأتي في نفس الوقت، فهي مكتوبة مرة واحدة لكل حصة. اضغط على أي حصة تشعيب لفتح الخطة.</p>
+      </div>
+      <div>
+        <h2>ما أُضيف للجدول الأصلي</h2>
+        <p>برمجة <bdi dir="ltr">10/A</bdi> من جدول أولى ثانوي، والتشعيب والثقافة المالية من جدولي <bdi dir="ltr">11/A</bdi> و <bdi dir="ltr">11/B</bdi>. لا يوجد تعارض بين أي حصتين.</p>
+      </div>
+      <div>
+        <h2>التصفية حسب الصف</h2>
+        <p>الوردي للابتدائي (الرابع إلى السادس) والأزرق للإعدادي (السابع إلى التاسع). الصف الرابع ليس له حصص في جدولك الحالي.</p>
+      </div>
+    </section>
+  </section>
+
+  <!-- plan -->
+  <section class="view" id="view-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
+    <div class="phead">
+      <h2>خطة البرمجة والذكاء الاصطناعي</h2>
+      <p>الصف الثاني البكالوريا والمنصة اليابانية، العام الدراسي 2026/2027</p>
+    </div>
+    <h3 class="sec">المواعيد المهمة</h3>
+    <div class="kds" id="kds"></div>
+    <h3 class="sec">الأسابيع</h3>
+    <div class="tl" id="tl"></div>
+    <p class="src">المصدر: توزيع محتوى المادة، صفحات الفصل الثاني 1 و2 و3 و5 وصفحة 6 من نهاية الفصل الأول. الصفحة 4 (الأسابيع 10 إلى 12) غير مرفقة.</p>
+  </section>
+</main>
+
+<script>
+/* ---------- timetable data ---------- */
+var DAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"];
+var PERIODS = [
+  { n: 1, t: "8:00 – 8:50", r: [480, 530] }, { n: 2, t: "8:50 – 9:40", r: [530, 580] },
+  { n: 3, t: "9:40 – 10:30", r: [580, 630] }, { n: 4, t: "10:30 – 11:20", r: [630, 680] },
+  { brk: true, t: "11:20 – 11:40" },
+  { n: 5, t: "11:40 – 12:30", r: [700, 750] }, { n: 6, t: "12:30 – 1:20", r: [750, 800] }
+];
+var TYPES = { prog: { cls: "t-prog", label: "برمجة" }, str: { cls: "t-str", label: "تشعيب" }, fin: { cls: "t-fin", label: "ثقافة مالية" } };
+var GRADE_NAMES = { 4: "الرابع", 5: "الخامس", 6: "السادس", 7: "السابع", 8: "الثامن", 9: "التاسع" };
+var STAGES = { pri: { label: "ابتدائي", grades: [4, 5, 6] }, prep: { label: "إعدادي", grades: [7, 8, 9] } };
+
+function ict(s, c, k) { var g = parseInt(c, 10); return { t: "ict", s: s, c: c, k: k, g: g, st: g <= 6 ? "pri" : "prep" }; }
+var PROG = { t: "prog", s: "برمجة", c: "10/A", g: 10 };
+var STR = { t: "str", s: "تشعيب", c: "11/A + 11/B", g: 11, plan: true };
+function fin(c) { return { t: "fin", s: "ثقافة مالية", c: c, g: 11 }; }
+
+// DATA[day][period number]
+var DATA = [
+  { 1: fin("11/B"), 3: PROG, 4: STR },
+  { 1: fin("11/A"), 3: ict("حاسب آلي", "5/A", "عربي"), 5: STR, 6: ict("حاسب آلي", "9/A", "عربي") },
+  { 1: ict("ICT", "9/B", "Languages"), 3: STR, 4: ict("ICT", "6/B") },
+  { 1: STR, 2: ict("حاسب آلي", "6/A", "عربي"), 3: ict("حاسب آلي", "7/A", "عربي"), 4: ict("حاسب آلي", "5/B", "عربي"), 5: ict("ICT", "5/C", "Languages") },
+  { 1: ict("حاسب آلي", "8/A", "عربي"), 2: STR, 3: PROG }
+];
+var ITEMS = [];
+
+function colorClass(it) { return it.t === "ict" ? (it.st === "pri" ? "t-pri" : "t-prep") : TYPES[it.t].cls; }
+function body(it) {
+  return "<span class='s'>" + it.s + "</span><span class='c'>" + it.c + "</span>" + (it.k ? "<span class='k'>" + it.k + "</span>" : "");
+}
+function planAttrs(it) { return it.plan ? " data-plan='1' role='button' tabindex='0' title='افتح خطة التشعيب'" : ""; }
+
+// dates of the current week (Sunday first)
+var now0 = new Date();
+var DATES = DAYS.map(function (_, i) {
+  return new Date(now0.getFullYear(), now0.getMonth(), now0.getDate() - now0.getDay() + i).getDate();
+});
+
+(function () {
+  var total = 0;
+  var h = "<thead><tr><th class='day'></th>";
+  PERIODS.forEach(function (p) {
+    if (p.brk) h += "<th class='brk'><span class='bl'>استراحة</span><span class='tm'>" + p.t + "</span></th>";
+    else h += "<th><span class='pn'>" + p.n + "</span><span class='tm'>" + p.t + "</span></th>";
+  });
+  h += "</tr></thead><tbody>";
+  DAYS.forEach(function (d, i) {
+    h += "<tr><th class='day' scope='row' data-day='" + i + "'><span class='dn'>" + d + "</span><span class='dd'>" + DATES[i] + "</span></th>";
+    var col = 0;
+    PERIODS.forEach(function (p) {
+      col++;
+      if (p.brk) { if (i === 0) h += "<td class='brk' rowspan='5'></td>"; return; }
+      var delay = (0.12 + i * 0.06 + col * 0.05).toFixed(2) + "s";
+      var it = DATA[i][p.n];
+      if (!it) { h += "<td class='free' style='--d:" + delay + "'></td>"; return; }
+      var idx = ITEMS.push(it) - 1; total++;
+      h += "<td class='lesson " + colorClass(it) + "' data-day='" + i + "' data-p='" + p.n + "' data-i='" + idx + "' style='--d:" + delay + "'>" +
+        "<i class='live' title='الآن'></i><div class='slot'" + planAttrs(it) + ">" + body(it) + "</div></td>";
+    });
+    h += "</tr>";
+  });
+  document.getElementById("tt").insertAdjacentHTML("beforeend", h + "</tbody>");
+
+  var dc = "";
+  DAYS.forEach(function (d, i) {
+    var rows = "", n = 0;
+    PERIODS.forEach(function (p) {
+      var it = !p.brk && DATA[i][p.n];
+      if (!it) return;
+      n++;
+      var idx = ITEMS.push(it) - 1;
+      rows += "<li class='row " + colorClass(it) + "' data-day='" + i + "' data-p='" + p.n + "' data-i='" + idx + "'" + planAttrs(it) + "><i class='live' title='الآن'></i>" +
+        "<div class='when'><b>" + p.n + "</b><span>" + p.t + "</span></div><div class='what'>" + body(it) + "</div></li>";
+    });
+    dc += "<section class='day-card' data-day='" + i + "' style='--d:" + (0.08 + i * 0.07).toFixed(2) + "s'>" +
+      "<h2><span class='dd'>" + DATES[i] + "</span>" + d + "<span class='tag'>اليوم</span><span class='count'>" + n + " حصص</span></h2><ul>" + rows + "</ul></section>";
+  });
+  document.getElementById("days").innerHTML = dc;
+
+  var month = "";
+  try { month = now0.toLocaleDateString("ar-EG-u-nu-latn", { month: "long", year: "numeric" }) + " · "; } catch (e) {}
+  document.getElementById("sub").textContent = month + total + " حصة في الأسبوع";
+})();
+
+/* ---------- filters: one active filter at a time (grade, stage or subject) ---------- */
+var FILTER = { k: "all", v: null };
+(function () {
+  var gc = { 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 }, tc = { prog: 0, str: 0, fin: 0 };
+  // count once per timetable cell
+  document.querySelectorAll("td.lesson").forEach(function (td) {
+    var it = ITEMS[+td.dataset.i];
+    if (it.t === "ict") gc[it.g]++; else tc[it.t]++;
+  });
+  var k = 0;
+  function d() { return "style='--d:" + (0.12 + k++ * 0.04).toFixed(2) + "s'"; }
+  function chip(cls, kind, v, label, n, extra) {
+    return "<button type='button' class='chip " + cls + (extra || "") + "' data-k='" + kind + "' data-v='" + v + "' aria-pressed='false' " + d() + "><span class='dot'></span>" + label + "<span class='n'>" + n + "</span></button>";
+  }
+  var h = "<div class='frow'><span class='flabel'>الصف</span>" +
+    "<button type='button' class='chip' data-k='all' data-v='' aria-pressed='true' " + d() + ">الكل</button>";
+  Object.keys(STAGES).forEach(function (sk) {
+    var st = STAGES[sk], sum = 0;
+    st.grades.forEach(function (g) { sum += gc[g]; });
+    h += "<div class='fgrp'>" + chip("t-" + sk, "stage", sk, st.label, sum, " stage-chip");
+    st.grades.forEach(function (g) { h += chip("t-" + sk, "grade", g, GRADE_NAMES[g], gc[g]); });
+    h += "</div>";
+  });
+  h += "</div><div class='frow'><span class='flabel'>المادة</span><div class='fgrp'>";
+  Object.keys(TYPES).forEach(function (key) { h += chip(TYPES[key].cls, "type", key, TYPES[key].label, tc[key]); });
+  h += "</div></div>";
+  document.getElementById("filters").innerHTML = h;
+})();
+
+function matches(it) {
+  var f = FILTER;
+  if (f.k === "all") return true;
+  if (f.k === "grade") return it.t === "ict" && it.g === f.v;
+  if (f.k === "stage") return it.t === "ict" && it.st === f.v;
+  return it.t === f.v;
+}
+function applyFilter() {
+  document.querySelectorAll("#filters .chip").forEach(function (c) {
+    var on = (c.dataset.k === "all" && FILTER.k === "all") || (c.dataset.k === FILTER.k && String(c.dataset.v) === String(FILTER.v));
+    c.setAttribute("aria-pressed", String(on));
+  });
+  var hits = 0;
+  document.querySelectorAll("td.lesson, .row").forEach(function (el) {
+    var ok = matches(ITEMS[+el.dataset.i]);
+    var tgt = el.matches("td") ? el.querySelector(".slot") : el;
+    tgt.classList.toggle("dim", !ok);
+    if (ok && el.matches("td")) hits++;
+  });
+  var em = document.getElementById("empty");
+  if (FILTER.k !== "all" && hits === 0) {
+    var what = FILTER.k === "grade" ? "للصف " + GRADE_NAMES[FILTER.v] : FILTER.k === "stage" ? "للمرحلة " + STAGES[FILTER.v].label : "";
+    em.innerHTML = "<span>لا توجد حصص " + what + " في جدولك الحالي.</span><button type='button' class='link-btn' id='showAll'>عرض الكل</button>";
+    em.hidden = false;
+  } else {
+    em.hidden = true;
+  }
+}
+document.getElementById("filters").addEventListener("click", function (e) {
+  var b = e.target.closest(".chip");
+  if (!b) return;
+  var kind = b.dataset.k, v = kind === "grade" ? +b.dataset.v : (b.dataset.v || null);
+  if (kind === "all" || (FILTER.k === kind && FILTER.v === v)) FILTER = { k: "all", v: null };
+  else FILTER = { k: kind, v: v };
+  applyFilter();
+});
+document.getElementById("empty").addEventListener("click", function (e) {
+  if (e.target.id === "showAll") { FILTER = { k: "all", v: null }; applyFilter(); }
+});
+
+/* ---------- plan data ---------- */
+var AR_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+function D(a) { return new Date(a[0], a[1] - 1, a[2]); }
+var REVIEW = { t: "مراجعة الكتاب", per: "1–2" };
+function U(unit, ut, n, lt) { return { unit: unit, ut: ut, n: n, lt: lt, per: "1–4" }; }
+function P(per, ch) { return { per: per, ch: ch }; }
+var RV = "مراجعة الفهم";
+
+var PLAN = [
+  { id: "t1-16", term: 1, wk: 16, d: [2026, 12, 26], book: REVIEW, plat: P("3–6", [[9, "العامل المنطقي"], [10, "العملية التكرارية"], [11, RV], [12, "الدالة (1)"]]) },
+  { id: "t1-17", term: 1, wk: 17, d: [2027, 1, 2], book: REVIEW, plat: P("3–6", [[13, "الدالة (2)"], [14, RV], [15, "المصفوفة (1)"], [16, "المصفوفة (2)"]]),
+    notes: [{ k: "hol", t: "6 و7 و8 يناير: لا تعقد امتحانات (أعياد الإخوة المسيحيين)" }, { k: "hol", t: "عيد الميلاد المجيد يوم الخميس 7 يناير" }] },
+  { id: "t1-18", term: 1, wk: 18, d: [2027, 1, 9], blank: true },
+
+  { id: "t2-1", term: 2, wk: 1, d: [2027, 2, 6], weekly: true, book: U(5, "جمع البيانات وتنقيتها", "1-5", "طرق جمع البيانات"), plat: P("5–6", [[17, RV], [18, "bool"]]),
+    notes: [{ k: "info", t: "بداية الفصل الدراسي الثاني" }] },
+  { id: "t2-2", term: 2, wk: 2, d: [2027, 2, 13], weekly: true, book: U(5, "جمع البيانات وتنقيتها", "2-5", "تنقية البيانات وتحويلها"), plat: P("5–6", [[19, "الدوال (3)"], [20, RV]]) },
+  { id: "t2-3", term: 2, wk: 3, d: [2027, 2, 20], weekly: true, book: U(5, "جمع البيانات وتنقيتها", "3-5", "البيانات المفتوحة وواجهات برمجة التطبيقات"), plat: P("5–6", [[21, RV], [22, RV], [23, "جملة for والمصفوفة"]]) },
+  { id: "t2-4", term: 2, wk: 4, d: [2027, 2, 27], weekly: true, book: U(6, "التحليل والتواصل", "1-6", "الاستدلال الإحصائي"), plat: P("5–6", [[24, RV], [25, RV], [26, "Switch statement (1)"]]) },
+  { id: "t2-5", term: 2, wk: 5, d: [2027, 3, 6], weekly: true, book: U(6, "التحليل والتواصل", "2-6", "استخدام تحليل الانحدار وتقييمه"), plat: P("5–6", [[27, "Switch statement (2)"], [28, "Switch statement (3)"]]),
+    notes: [{ k: "hol", t: "عيد الفطر المبارك بدءًا من 9/3/2027" }] },
+  { id: "t2-6", term: 2, wk: 6, d: [2027, 3, 13], weekly: true, book: U(6, "التحليل والتواصل", "3-6", "تمثيل البيانات المرئي والتواصل"), plat: P("5–6", [[29, "While loop (1)"], [30, "While loop (2)"]]),
+    notes: [{ k: "exam", t: "الاختبار الشهري الأول من 14 إلى 18 مارس" }] },
+  { id: "t2-7", term: 2, wk: 7, d: [2027, 3, 20], weekly: true, book: U(7, "التعلم الآلي والذكاء الاصطناعي", "1-7", "أساسيات التعلم الآلي"), plat: P("5–6", [[31, "While loop (3)"], [32, "While loop (4)"]]) },
+  { id: "t2-8", term: 2, wk: 8, d: [2027, 3, 27], weekly: true, book: U(7, "التعلم الآلي والذكاء الاصطناعي", "1-7", "تابع أساسيات التعلم الآلي"), plat: P("5–6", [[33, "While loop (5)"], [34, "While loop (6)"]]),
+    notes: [{ k: "meet", t: "اللقاء التشاوري الأول لأولياء الأمور يوم 1 أبريل" }] },
+  { id: "t2-9", term: 2, wk: 9, d: [2027, 4, 3], weekly: true, book: U(7, "التعلم الآلي والذكاء الاصطناعي", "2-7", "الشبكات العصبية والتعلم العميق"), plat: P("5–6", [[35, "Array operations (add, remove, access) (1)"], [36, "Array operations (add, remove, access) (2)"]]) },
+  { id: "t2-10", term: 2, missing: true, d: [2027, 4, 10], label: "الأسابيع 10 إلى 12 (10 و17 و24 أبريل)" },
+  { id: "t2-13", term: 2, wk: 13, d: [2027, 5, 1], book: REVIEW, plat: P("3–6", [[43, "Loop control (break / continue) (1)"], [44, "Loop control (break / continue) (2)"], [45, "Loop control (break / continue) (3)"]]),
+    notes: [{ k: "hol", t: "عيد العمال 1 مايو، وشم النسيم الاثنين 3 مايو" }] },
+  { id: "t2-14", term: 2, wk: 14, d: [2027, 5, 8], book: REVIEW, plat: P("3–6", [[46, "Review"], [47, "Review"]]),
+    notes: [{ k: "meet", t: "اللقاء التشاوري الثاني لأولياء الأمور يوم 9 مايو" }] },
+  { id: "t2-15", term: 2, wk: 15, d: [2027, 5, 15], book: REVIEW, plat: { per: "3–6", text: "مراجعة المنصة" } },
+  { id: "t2-16", term: 2, wk: 16, d: [2027, 5, 22], blank: true }
+];
+
+var KEYDATES = [
+  { d: [2027, 1, 6], e: [2027, 1, 8], t: "لا تعقد امتحانات (أعياد الإخوة المسيحيين)", k: "hol" },
+  { d: [2027, 2, 6], t: "بداية الفصل الدراسي الثاني", k: "info" },
+  { d: [2027, 3, 9], t: "عيد الفطر المبارك", k: "hol" },
+  { d: [2027, 3, 14], e: [2027, 3, 18], t: "الاختبار الشهري الأول", k: "exam" },
+  { d: [2027, 4, 1], t: "اللقاء التشاوري الأول لأولياء الأمور", k: "meet" },
+  { d: [2027, 5, 1], t: "عيد العمال", k: "hol" },
+  { d: [2027, 5, 3], t: "شم النسيم", k: "hol" },
+  { d: [2027, 5, 9], t: "اللقاء التشاوري الثاني لأولياء الأمور", k: "meet" }
+];
+
+function fmt(a) { return a[2] + " " + AR_MONTHS[a[1] - 1]; }
+function bookHtml(b) {
+  if (b.unit) return "<p class='u'>الوحدة " + b.unit + " · " + b.ut + "</p><p>الدرس <bdi dir='ltr'>" + b.n + "</bdi> · " + b.lt + "</p>";
+  return "<p>" + b.t + "</p>";
+}
+function platHtml(p) {
+  if (p.text) return "<p>" + p.text + "</p>";
+  return "<ul class='chs'>" + p.ch.map(function (c) { return "<li><b>فصل " + c[0] + "</b><bdi>" + c[1] + "</bdi></li>"; }).join("") + "</ul>";
+}
+function weekTitle(w) { return w.term === 1 ? "الأسبوع " + w.wk + " من الفصل الأول" : "الأسبوع " + w.wk + " من الفصل الثاني"; }
+
+(function () {
+  var h = "", lastTerm = 0, lastMon = "", i = 0;
+  PLAN.forEach(function (w) {
+    var delay = "style='--d:" + Math.min(i++ * 0.04, 0.5).toFixed(2) + "s'";
+    if (w.term !== lastTerm) {
+      h += "<h3 class='termh'>" + (w.term === 1 ? "نهاية الفصل الأول" : "الفصل الدراسي الثاني 2026/2027") + "</h3>";
+      lastTerm = w.term; lastMon = "";
+    }
+    var mk = w.d[0] + "-" + w.d[1];
+    if (mk !== lastMon) { h += "<div class='mon'>" + AR_MONTHS[w.d[1] - 1] + " " + w.d[0] + "</div>"; lastMon = mk; }
+    if (w.missing) {
+      h += "<article class='wk missing' id='wk-" + w.id + "' " + delay + "><p class='mute'>" + w.label + ": الصفحة 4 من الخطة غير مرفقة. أرسلها لتظهر هنا.</p></article>";
+      return;
+    }
+    var head = "<header class='wk-h'><span class='wk-n'>" + w.wk + "</span><div><span class='wk-l'>" + (w.term === 1 ? "الفصل الأول" : "الفصل الثاني") + "</span><span class='wk-d' style='display:block'>" + fmt(w.d) + "</span></div><span class='wk-tag'></span></header>";
+    if (w.blank) {
+      h += "<article class='wk blank' id='wk-" + w.id + "' data-id='" + w.id + "' " + delay + ">" + head + "<p class='mute'>لا يوجد محتوى في هذا الأسبوع.</p></article>";
+      return;
+    }
+    var notes = (w.weekly ? "<span class='nt'>أداءات وتقييمات أسبوعية</span>" : "") +
+      (w.notes || []).map(function (n) { return "<span class='nt k-" + n.k + "'>" + n.t + "</span>"; }).join("");
+    h += "<article class='wk' id='wk-" + w.id + "' data-id='" + w.id + "' " + delay + ">" + head +
+      "<div class='blk bk'><div class='bl2'><span class='lab'>الكتاب</span><span class='per'>ح " + w.book.per + "</span></div>" + bookHtml(w.book) + "</div>" +
+      "<div class='blk pf'><div class='bl2'><span class='lab'>المنصة</span><span class='per'>ح " + w.plat.per + "</span></div>" + platHtml(w.plat) + "</div>" +
+      (notes ? "<div class='wk-notes'>" + notes + "</div>" : "") + "</article>";
+  });
+  document.getElementById("tl").innerHTML = h;
+
+  var kd = "";
+  KEYDATES.forEach(function (x, j) {
+    var day = x.e ? x.d[2] + "–" + x.e[2] : x.d[2];
+    kd += "<div class='kd k-" + x.k + "' style='--d:" + (j * 0.04).toFixed(2) + "s'><div class='dt'><b>" + day + "</b><span>" + AR_MONTHS[x.d[1] - 1] + "</span></div>" +
+      "<div class='tx'><b>" + x.t + "</b><span data-kd='" + j + "'></span></div></div>";
+  });
+  document.getElementById("kds").innerHTML = kd;
+})();
+
+/* ---------- plan state: current week, next week, countdowns ---------- */
+function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function countdown(days) {
+  if (days === 0) return "اليوم";
+  if (days === 1) return "غدًا";
+  if (days === 2) return "بعد يومين";
+  if (days > 0) return "بعد " + days + " يوم";
+  return "انتهى";
+}
+function planFocus() {
+  var now = new Date(), weeks = PLAN.filter(function (w) { return !w.missing; }), next = null, cur = null;
+  weeks.forEach(function (w) {
+    var s = D(w.d), e = new Date(s.getFullYear(), s.getMonth(), s.getDate() + 7);
+    if (now >= s && now < e) cur = w;
+    else if (s > now && !next) next = w;
+  });
+  return { cur: cur, next: next, last: weeks[weeks.length - 1], now: now };
+}
+function refreshPlan() {
+  var f = planFocus(), today = startOfDay(f.now);
+  document.querySelectorAll(".wk[data-id]").forEach(function (el) {
+    var w = PLAN.filter(function (x) { return x.id === el.dataset.id; })[0], s = D(w.d), e = new Date(s.getFullYear(), s.getMonth(), s.getDate() + 7);
+    el.classList.toggle("past", e <= f.now);
+    el.classList.toggle("cur", f.cur === w);
+    el.classList.toggle("next", !f.cur && f.next === w);
+    el.querySelector(".wk-tag").textContent = f.cur === w ? "هذا الأسبوع" : (!f.cur && f.next === w ? "القادم" : "");
+  });
+  KEYDATES.forEach(function (x, j) {
+    var s = D(x.d), e = x.e ? D(x.e) : s, el = document.querySelector("[data-kd='" + j + "']");
+    var days = Math.round((s - today) / 864e5);
+    el.textContent = (today >= s && today <= e) ? "جارٍ الآن" : countdown(days);
+  });
+  // banner on the timetable tab
+  var w = f.cur || f.next, b = document.getElementById("banner");
+  var icon = "<span class='pb-ic' aria-hidden='true'><svg viewBox='0 0 24 24' width='22' height='22'><path fill='currentColor' d='M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 4h5v8l-2.5-1.5L6 12V4z'/></svg></span>";
+  if (!w) { b.hidden = true; return; }
+  b.hidden = false;
+  var sum = w.blank ? "لا يوجد محتوى في هذا الأسبوع"
+    : "الكتاب: " + (w.book.unit ? w.book.lt : w.book.t) + " · المنصة: " + (w.plat.text ? w.plat.text : "فصول " + w.plat.ch[0][0] + "–" + w.plat.ch[w.plat.ch.length - 1][0]);
+  var head, key;
+  if (f.cur) { key = "هذا الأسبوع في خطة تانية ثانوي"; head = weekTitle(w); }
+  else { key = "أقرب أسبوع في خطة تانية ثانوي"; head = weekTitle(w) + " · يبدأ " + fmt(w.d).replace(/^(\d+) (.*)$/, "$1 $2") + " (" + countdown(Math.round((D(w.d) - today) / 864e5)) + ")"; }
+  b.innerHTML = icon + "<div class='pb-tx'><span class='pb-k'>" + key + "</span><span class='pb-m'>" + head + "</span><span class='pb-s'>" + sum + "</span></div>" +
+    "<button type='button' class='link-btn' data-plan='1'>عرض الخطة</button>";
+  b.dataset.target = w.id;
+}
+
+/* ---------- tabs ---------- */
+function setView(v) {
+  var plan = v === "plan";
+  document.getElementById("view-tt").hidden = plan;
+  document.getElementById("view-plan").hidden = !plan;
+  document.getElementById("tab-tt").setAttribute("aria-selected", String(!plan));
+  document.getElementById("tab-plan").setAttribute("aria-selected", String(plan));
+  document.getElementById("todayBtn").hidden = plan;
+}
+function openPlan(scroll) {
+  setView("plan");
+  if (!scroll) return;
+  var f = planFocus(), w = f.cur || f.next || f.last, el = w && document.getElementById("wk-" + w.id);
+  if (el) setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 60);
+}
+document.getElementById("tab-tt").addEventListener("click", function () { setView("tt"); });
+document.getElementById("tab-plan").addEventListener("click", function () { openPlan(false); });
+document.addEventListener("click", function (e) { if (e.target.closest("[data-plan]")) openPlan(true); });
+document.addEventListener("keydown", function (e) {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches("[role='button'][data-plan]")) { e.preventDefault(); openPlan(true); }
+});
+refreshPlan();
+setInterval(refreshPlan, 60000);
+try { if (location.hash === "#plan") setView("plan"); } catch (e) {}
+
+/* ---------- today + current lesson ---------- */
+function markNow() {
+  var d = new Date(), day = d.getDay(), m = d.getHours() * 60 + d.getMinutes();
+  document.querySelectorAll("th.day.today, .day-card.today, .now").forEach(function (e) { e.classList.remove("today", "now"); });
+  document.getElementById("todayBtn").disabled = day > 4;
+  if (day > 4) return;
+  document.querySelectorAll("th.day[data-day='" + day + "'], .day-card[data-day='" + day + "']").forEach(function (e) { e.classList.add("today"); });
+  PERIODS.forEach(function (p) {
+    if (p.brk || m < p.r[0] || m >= p.r[1]) return;
+    document.querySelectorAll("[data-day='" + day + "'][data-p='" + p.n + "']").forEach(function (e) { e.classList.add("now"); });
+  });
+}
+markNow();
+setInterval(markNow, 60000);
+
+document.getElementById("todayBtn").addEventListener("click", function () {
+  var day = new Date().getDay();
+  if (day > 4) return;
+  var card = document.querySelector(".day-card[data-day='" + day + "']");
+  if (card && card.offsetParent !== null) card.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.querySelectorAll("th.day[data-day='" + day + "'] .dd, .day-card[data-day='" + day + "'] .dd").forEach(function (el) {
+    el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump");
+  });
+});
+</script>
+
+</body></html>
