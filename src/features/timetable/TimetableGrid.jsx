@@ -1,16 +1,8 @@
 import React from 'react'
-import { DAYS, PERIODS, colorClass, body, planAttrs, getDates } from './timetableApi.jsx'
+import { DAYS, PERIODS, colorClass, body, getDates } from './timetableApi.jsx'
 
-function TimetableGrid({ items, dimmedItems, today, currentPeriod, onOpenPlan }) {
+function TimetableGrid({ items, dimmedItems, today, currentPeriod }) {
   const dates = getDates()
-  
-  // Handle plan click
-  const handleKeyDown = (e, item) => {
-    if ((e.key === 'Enter' || e.key === ' ') && item.plan) {
-      e.preventDefault()
-      onOpenPlan(true)
-    }
-  }
   
   // Build table
   const renderTable = () => {
@@ -76,7 +68,6 @@ function TimetableGrid({ items, dimmedItems, today, currentPeriod, onOpenPlan })
                     }
                     
                     const cls = colorClass(it)
-                    const planAttr = planAttrs(it)
                     
                     return (
                       <td 
@@ -87,12 +78,7 @@ function TimetableGrid({ items, dimmedItems, today, currentPeriod, onOpenPlan })
                         style={{ '--d': delay }}
                       >
                         <i className="live" title="الآن"></i>
-                        <div 
-                          className={`slot ${isDimmed ? 'dim' : ''}`}
-                          {...planAttr}
-                          onClick={() => it.plan && onOpenPlan(true)}
-                          onKeyDown={(e) => handleKeyDown(e, it)}
-                        >
+                        <div className={`slot ${isDimmed ? 'dim' : ''}`}>
                           {body(it)}
                         </div>
                       </td>
@@ -135,7 +121,6 @@ function TimetableGrid({ items, dimmedItems, today, currentPeriod, onOpenPlan })
                   const key = `${i}-${it.period}`
                   const isDimmed = dimmedItems.has(key)
                   const isNow = currentPeriod === it.period && today === i
-                  const planAttr = planAttrs(it)
                   
                   return (
                     <li 
@@ -143,9 +128,6 @@ function TimetableGrid({ items, dimmedItems, today, currentPeriod, onOpenPlan })
                       className={`row ${colorClass(it)} ${isNow ? 'now' : ''}`}
                       data-day={i}
                       data-p={it.period}
-                      {...planAttr}
-                      onClick={() => it.plan && onOpenPlan(true)}
-                      onKeyDown={(e) => handleKeyDown(e, it)}
                     >
                       <i className="live" title="الآن"></i>
                       <div className="when">

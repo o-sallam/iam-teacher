@@ -1,7 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import { useTimetable } from '../features/timetable/useTimetable'
-import { planFocus, D } from '../features/timetable/planData'
 import App from '../App'
 
 // Helper to create a date in local timezone
@@ -180,63 +178,6 @@ describe('Interval update', () => {
   })
 })
 
-describe('Plan page week highlights', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-    vi.setSystemTime(createDate(2026, 9, 14, 12, 0))
-  })
-  
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
-  it('case 8: Wed 14 Oct 2026 - first week has next and tag', async () => {
-    const { container } = render(<App />)
-    
-    // Click on plan tab
-    const planTab = screen.getByRole('tab', { name: /خطة تانية ثانوي/ })
-    fireEvent.click(planTab)
-    
-    // Wait for state to update via setInterval (60s)
-    await advanceAndRender(container)
-    await advanceAndRender(container)
-    
-    // First week (t1-16, Dec 26) should have 'next'
-    const firstWeek = container.querySelector('#wk-t1-16')
-    expect(firstWeek.classList.contains('next')).toBe(true)
-    expect(firstWeek.classList.contains('cur')).toBe(false)
-    expect(firstWeek.classList.contains('past')).toBe(false)
-    
-    // Tag should show "القادم" - the tag is rendered outside the header in the article
-    const tag = firstWeek.querySelector(':scope > .wk-tag')
-    expect(tag.textContent).toBe('القادم')
-  })
-
-  it('case 8: Sat 26 Dec 2026 12:00 - first week has cur and tag', async () => {
-    vi.setSystemTime(createDate(2026, 11, 26, 12, 0))
-    
-    const { container } = render(<App />)
-    
-    // Click on plan tab
-    const planTab = screen.getByRole('tab', { name: /خطة تانية ثانوي/ })
-    fireEvent.click(planTab)
-    
-    // Wait for state to update
-    await advanceAndRender(container)
-    await advanceAndRender(container)
-    
-    // First week (t1-16, Dec 26) should have 'cur'
-    const firstWeek = container.querySelector('#wk-t1-16')
-    expect(firstWeek.classList.contains('cur')).toBe(true)
-    expect(firstWeek.classList.contains('next')).toBe(false)
-    expect(firstWeek.classList.contains('past')).toBe(false)
-    
-    // Tag should show "هذا الأسبوع"
-    const tag = firstWeek.querySelector(':scope > .wk-tag')
-    expect(tag.textContent).toBe('هذا الأسبوع')
-  })
-})
-
 describe('Today button', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -325,34 +266,5 @@ describe('Persistence after state changes', () => {
     // Still present
     dayHeader = container.querySelector('th.day[data-day="3"]')
     expect(dayHeader.classList.contains('today')).toBe(true)
-  })
-
-  it('case 7: tab switch preserves today/now', async () => {
-    const { container } = render(<App />)
-    
-    await advanceAndRender(container)
-    
-    // Verify initial state
-    let dayHeader = container.querySelector('th.day[data-day="3"]')
-    expect(dayHeader.classList.contains('today')).toBe(true)
-    
-    // Switch to plan tab
-    const planTab = screen.getByRole('tab', { name: /خطة تانية ثانوي/ })
-    fireEvent.click(planTab)
-    
-    await advanceAndRender(container)
-    
-    // Switch back to timetable tab
-    const ttTab = screen.getByRole('tab', { name: /الجدول الأسبوعي/ })
-    fireEvent.click(ttTab)
-    
-    await advanceAndRender(container)
-    
-    // Today should still be present
-    dayHeader = container.querySelector('th.day[data-day="3"]')
-    expect(dayHeader.classList.contains('today')).toBe(true)
-    
-    const td = container.querySelector('td.lesson[data-day="3"][data-p="3"]')
-    expect(td.classList.contains('now')).toBe(true)
   })
 })

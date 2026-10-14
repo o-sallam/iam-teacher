@@ -4,7 +4,7 @@ import TimetableGrid from './TimetableGrid.jsx'
 import Button from '../../components/Button.jsx'
 import { DAYS, PERIODS, TYPES, GRADE_NAMES, STAGES, getDates } from './timetableApi.jsx'
 
-function TimetablePage({ onOpenPlan, onSubtitleChange }) {
+function TimetablePage({ onSubtitleChange }) {
   const { filter, setFilter, matches, chipCounts, today, currentPeriod, weekDates, items } = useTimetable()
   const [subtitle, setSubtitle] = useState('')
   const [empty, setEmpty] = useState(null)
@@ -160,7 +160,6 @@ function TimetablePage({ onOpenPlan, onSubtitleChange }) {
         dimmedItems={dimmedItems} 
         today={today} 
         currentPeriod={currentPeriod}
-        onOpenPlan={onOpenPlan}
       />
     </>
   )

@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Navbar({ subtitle, disabled, onClick, onOpenPlan }) {
+function Navbar({ subtitle, disabled, onClick }) {
   return (
     <header className="bar">
       <span className="logo" aria-hidden="true">

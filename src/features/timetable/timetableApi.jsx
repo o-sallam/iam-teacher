@@ -29,7 +29,7 @@ export function ict(s, c, k) {
 }
 
 export const PROG = { t: "prog", s: "برمجة", c: "10/A", g: 10 };
-export const STR = { t: "str", s: "تشعيب", c: "11/A + 11/B", g: 11, plan: true };
+export const STR = { t: "str", s: "تشعيب", c: "11/A + 11/B", g: 11 };
 
 export function fin(c) {
   return { t: "fin", s: "ثقافة مالية", c: c, g: 11 };
@@ -61,15 +61,7 @@ export function body(it) {
   );
 }
 
-export function planAttrs(it) {
-  if (!it.plan) return {};
-  return {
-    'data-plan': '1',
-    role: 'button',
-    tabIndex: 0,
-    title: 'افتح خطة التشعيب'
-  };
-}
+
 
 export function getDates() {
   const now0 = new Date();
