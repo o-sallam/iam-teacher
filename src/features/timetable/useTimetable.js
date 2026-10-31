@@ -1,17 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { DATA, PERIODS, GRADE_NAMES, STAGES, ict } from './timetableApi.jsx'
+import { DATA, PERIODS, GRADE_NAMES, STAGES } from './timetableApi.jsx'
 
 // Count items per grade and type
 function countItems(items) {
-  const gc = { 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
+  const gc = Object.fromEntries(Object.keys(GRADE_NAMES).map(g => [g, 0]));
   const tc = { prog: 0, str: 0, fin: 0 };
   
   items.forEach(it => {
-    if (it.t === 'ict') {
-      gc[it.g] = (gc[it.g] || 0) + 1;
-    } else {
-      tc[it.t] = (tc[it.t] || 0) + 1;
-    }
+    gc[it.g] = (gc[it.g] || 0) + 1;
+    tc[it.t] = (tc[it.t] || 0) + 1;
   });
   
   return { gc, tc };
@@ -68,22 +65,18 @@ export function useTimetable() {
   
   const matches = useCallback((it) => {
     if (filter.k === 'all') return true
-    if (filter.k === 'grade') return it.t === 'ict' && it.g === filter.v
-    if (filter.k === 'stage') return it.t === 'ict' && it.st === filter.v
+    if (filter.k === 'grade') return it.g === filter.v
+    if (filter.k === 'stage') return it.st === filter.v
     return it.t === filter.v
   }, [filter])
   
   const counts = countItems(items)
   
   const chipCounts = {
-    pri: counts.gc[4] + counts.gc[5] + counts.gc[6],
-    prep: counts.gc[7] + counts.gc[8] + counts.gc[9],
-    4: counts.gc[4] || 0,
-    5: counts.gc[5] || 0,
-    6: counts.gc[6] || 0,
-    7: counts.gc[7] || 0,
-    8: counts.gc[8] || 0,
-    9: counts.gc[9] || 0,
+    ...counts.gc,
+    ...Object.fromEntries(Object.entries(STAGES).map(([key, stage]) => [
+      key, stage.grades.reduce((sum, grade) => sum + (counts.gc[grade] || 0), 0)
+    ])),
     prog: counts.tc.prog || 0,
     str: counts.tc.str || 0,
     fin: counts.tc.fin || 0

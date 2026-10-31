@@ -16,38 +16,29 @@ export const TYPES = {
   fin: { cls: "t-fin", label: "ثقافة مالية" }
 };
 
-export const GRADE_NAMES = { 4: "الرابع", 5: "الخامس", 6: "السادس", 7: "السابع", 8: "الثامن", 9: "التاسع" };
+export const GRADE_NAMES = { 10: "1 ثانوي", 11: "2 ثانوي" };
 
 export const STAGES = {
-  pri: { label: "ابتدائي", grades: [4, 5, 6] },
-  prep: { label: "إعدادي", grades: [7, 8, 9] }
+  sec: { label: "ثانوي", grades: [10, 11] }
 };
 
-export function ict(s, c, k) {
-  const g = parseInt(c, 10);
-  return { t: "ict", s: s, c: c, k: k, g: g, st: g <= 6 ? "pri" : "prep" };
-}
-
-export const PROG = { t: "prog", s: "برمجة", c: "10/A", g: 10 };
-export const STR = { t: "str", s: "تشعيب", c: "11/A + 11/B", g: 11 };
+export const PROG = { t: "prog", s: "برمجة", c: "10/A", g: 10, st: "sec" };
+export const STR = { t: "str", s: "تشعيب", c: "11/A + 11/B", g: 11, st: "sec" };
 
 export function fin(c) {
-  return { t: "fin", s: "ثقافة مالية", c: c, g: 11 };
+  return { t: "fin", s: "ثقافة مالية", c: c, g: 11, st: "sec" };
 }
 
 // DATA[day][period number]
 export const DATA = [
   { 1: fin("11/B"), 3: PROG, 4: STR },
-  { 1: fin("11/A"), 3: ict("حاسب آلي", "5/A", "عربي"), 5: STR, 6: ict("حاسب آلي", "9/A", "عربي") },
-  { 1: ict("ICT", "9/B", "Languages"), 3: STR, 4: ict("ICT", "6/B") },
-  { 1: STR, 2: ict("حاسب آلي", "6/A", "عربي"), 3: ict("حاسب آلي", "7/A", "عربي"), 4: ict("حاسب آلي", "5/B", "عربي"), 5: ict("ICT", "5/C", "Languages") },
-  { 1: ict("حاسب آلي", "8/A", "عربي"), 2: STR, 3: PROG }
+  { 1: fin("11/A"), 5: STR },
+  { 3: STR },
+  { 1: STR },
+  { 2: STR, 3: PROG }
 ];
 
 export function colorClass(it) {
-  if (it.t === "ict") {
-    return it.st === "pri" ? "t-pri" : "t-prep";
-  }
   return TYPES[it.t].cls;
 }
 

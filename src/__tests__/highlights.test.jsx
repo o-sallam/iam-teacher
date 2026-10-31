@@ -17,7 +17,7 @@ async function advanceAndRender(container) {
 describe('Today highlight', () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    vi.setSystemTime(createDate(2026, 9, 14, 9, 45))
+    vi.setSystemTime(createDate(2026, 9, 14, 8, 10))
   })
   
   afterEach(() => {
@@ -83,20 +83,20 @@ describe('Today highlight', () => {
 describe('Current lesson highlight', () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    vi.setSystemTime(createDate(2026, 9, 14, 9, 45))
+    vi.setSystemTime(createDate(2026, 9, 14, 8, 10))
   })
   
   afterEach(() => {
     vi.useRealTimers()
   })
 
-  it('case 1: Wed 14 Oct 2026 09:45 - period 3 has now', async () => {
+  it('case 1: Wed 14 Oct 2026 08:10 - period 1 has now', async () => {
     const { container } = render(<App />)
     
     await advanceAndRender(container)
     
-    // Period 3 on day 3 should have 'now'
-    const td = container.querySelector('td.lesson[data-day="3"][data-p="3"]')
+    // Period 1 on day 3 should have 'now'
+    const td = container.querySelector('td.lesson[data-day="3"][data-p="1"]')
     expect(td.classList.contains('now')).toBe(true)
     
     // Live dot should be visible
@@ -104,7 +104,7 @@ describe('Current lesson highlight', () => {
     expect(live).toBeTruthy()
     
     // Mobile row should also have now
-    const row = container.querySelector('li.row[data-day="3"][data-p="3"]')
+    const row = container.querySelector('li.row[data-day="3"][data-p="1"]')
     expect(row.classList.contains('now')).toBe(true)
   })
 
@@ -155,11 +155,11 @@ describe('Current lesson highlight', () => {
 })
 
 describe('Interval update', () => {
-  it('case 6: advances 60s moves now from period 3 to 4', async () => {
+  it('case 6: period 4 is current at 10:30', async () => {
     vi.useFakeTimers()
-    // Start at exactly 10:30 (period 3: 580-630, period 4: 630-680)
+    // Sunday has lessons in both periods 3 and 4.
     // 10:30 = 630 min - that's when period 4 starts
-    vi.setSystemTime(createDate(2026, 9, 14, 10, 30, 0))
+    vi.setSystemTime(createDate(2026, 9, 11, 10, 30, 0))
     
     const { container } = render(<App />)
     
@@ -167,11 +167,11 @@ describe('Interval update', () => {
     await advanceAndRender(container)
     
     // Period 4 should have now at 10:30 (start of period 4)
-    let td = container.querySelector('td.lesson[data-day="3"][data-p="4"]')
+    let td = container.querySelector('td.lesson[data-day="0"][data-p="4"]')
     expect(td.classList.contains('now')).toBe(true)
     
     // Period 3 should not have now
-    td = container.querySelector('td.lesson[data-day="3"][data-p="3"]')
+    td = container.querySelector('td.lesson[data-day="0"][data-p="3"]')
     expect(td.classList.contains('now')).toBe(false)
     
     vi.useRealTimers()
@@ -225,7 +225,7 @@ describe('Today button', () => {
 describe('Persistence after state changes', () => {
   beforeEach(() => {
     vi.useFakeTimers()
-    vi.setSystemTime(createDate(2026, 9, 14, 9, 45))
+    vi.setSystemTime(createDate(2026, 9, 14, 8, 10))
   })
   
   afterEach(() => {
@@ -241,11 +241,11 @@ describe('Persistence after state changes', () => {
     let dayHeader = container.querySelector('th.day[data-day="3"]')
     expect(dayHeader.classList.contains('today')).toBe(true)
     
-    let td = container.querySelector('td.lesson[data-day="3"][data-p="3"]')
+    let td = container.querySelector('td.lesson[data-day="3"][data-p="1"]')
     expect(td.classList.contains('now')).toBe(true)
     
     // Click a grade chip
-    const gradeChip = screen.getByRole('button', { name: /الرابع/ })
+    const gradeChip = screen.getByRole('button', { name: /1 ثانوي/ })
     fireEvent.click(gradeChip)
     
     await advanceAndRender(container)
@@ -254,7 +254,7 @@ describe('Persistence after state changes', () => {
     dayHeader = container.querySelector('th.day[data-day="3"]')
     expect(dayHeader.classList.contains('today')).toBe(true)
     
-    td = container.querySelector('td.lesson[data-day="3"][data-p="3"]')
+    td = container.querySelector('td.lesson[data-day="3"][data-p="1"]')
     expect(td.classList.contains('now')).toBe(true)
     
     // Click "الكل" to reset filter

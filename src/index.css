@@ -57,7 +57,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); paddin
 button { font-family: inherit; }
 
 .t-pri  { --bg-t: var(--pri-bg);  --fg-t: var(--pri-fg);  --dot: var(--pri-dot); }
-.t-prep { --bg-t: var(--prep-bg); --fg-t: var(--prep-fg); --dot: var(--prep-dot); }
+.t-sec, .t-prep { --bg-t: var(--prep-bg); --fg-t: var(--prep-fg); --dot: var(--prep-dot); }
 .t-prog { --bg-t: var(--prog-bg); --fg-t: var(--prog-fg); --dot: var(--prog-dot); }
 .t-str  { --bg-t: var(--str-bg);  --fg-t: var(--str-fg);  --dot: var(--str-dot); }
 .t-fin  { --bg-t: var(--fin-bg);  --fg-t: var(--fin-fg);  --dot: var(--fin-dot); }
