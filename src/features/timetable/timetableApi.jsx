@@ -32,7 +32,7 @@ export function fin(c) {
 // DATA[day][period number]
 export const DATA = [
   { 1: fin("11/B"), 3: PROG, 4: STR },
-  { 1: fin("11/A"), 5: STR },
+  { 4: fin("11/A"), 5: STR },
   { 3: STR },
   { 1: STR },
   { 2: STR, 3: PROG }
