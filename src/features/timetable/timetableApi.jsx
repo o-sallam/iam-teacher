@@ -6,8 +6,7 @@ export const PERIODS = [
   { n: 3, t: "9:40 – 10:30", r: [580, 630] },
   { n: 4, t: "10:30 – 11:20", r: [630, 680] },
   { brk: true, t: "11:20 – 11:40" },
-  { n: 5, t: "11:40 – 12:30", r: [700, 750] },
-  { n: 6, t: "12:30 – 1:20", r: [750, 800] }
+  { n: 5, t: "11:40 – 12:30", r: [700, 750] }
 ];
 
 export const TYPES = {
@@ -31,7 +30,7 @@ export function fin(c) {
 
 // DATA[day][period number]
 export const DATA = [
-  { 1: fin("11/B"), 3: PROG, 4: STR },
+  { 1: STR, 3: PROG, 4: fin("11/B") },
   { 4: fin("11/A"), 5: STR },
   { 3: STR },
   { 1: STR },
