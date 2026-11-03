@@ -20,6 +20,7 @@ export function useTimetable() {
   const [today, setToday] = useState(null)
   const [currentPeriod, setCurrentPeriod] = useState(null)
   const [weekDates, setWeekDates] = useState([])
+  const [now, setNow] = useState(() => new Date())
   
   // Initialize items from DATA
   useEffect(() => {
@@ -44,6 +45,7 @@ export function useTimetable() {
   useEffect(() => {
     const updateNow = () => {
       const d = new Date()
+      setNow(d)
       const day = d.getDay()
       const m = d.getHours() * 60 + d.getMinutes()
       
@@ -90,6 +92,7 @@ export function useTimetable() {
     today,
     currentPeriod,
     weekDates,
-    items
+    items,
+    now
   }
 }

@@ -2,10 +2,26 @@ import React, { useState, useEffect } from 'react'
 import { useTimetable } from './useTimetable.js'
 import TimetableGrid from './TimetableGrid.jsx'
 import Button from '../../components/Button.jsx'
-import { DAYS, PERIODS, TYPES, GRADE_NAMES, STAGES, getDates } from './timetableApi.jsx'
+import { TYPES, GRADE_NAMES, STAGES } from './timetableApi.jsx'
+import { useTeachingProgress } from '../curriculum/useTeachingProgress.js'
+import { completeSession, deferSession, planWeek, undoSession } from '../curriculum/curriculum.js'
+import TeachingProgressPanel from '../curriculum/TeachingProgressPanel.jsx'
+import SessionDetails from '../curriculum/SessionDetails.jsx'
+import CourseManager from '../curriculum/CourseManager.jsx'
+import StorageNotice from '../curriculum/StorageNotice.jsx'
 
 function TimetablePage({ onSubtitleChange }) {
-  const { filter, setFilter, matches, chipCounts, today, currentPeriod, weekDates, items } = useTimetable()
+  const { filter, setFilter, matches, chipCounts, today, currentPeriod, items, now } = useTimetable()
+  const { progress, update, storageError, retrySave } = useTeachingProgress()
+  const [selectedKey, setSelectedKey] = useState(null)
+  const [managingCourse, setManagingCourse] = useState(null)
+  // Always plan from the entire timetable, including classes hidden by a filter.
+  const sessions = planWeek(items, progress.courses, now)
+  const selectedSession = sessions.find(session => session.key === selectedKey)
+  const manageCourse = courseId => {
+    setSelectedKey(null)
+    setManagingCourse(courseId)
+  }
   const [subtitle, setSubtitle] = useState('')
   const [empty, setEmpty] = useState(null)
   const [dimmedItems, setDimmedItems] = useState(new Set())
@@ -86,6 +102,8 @@ function TimetablePage({ onSubtitleChange }) {
   
   return (
     <>
+      <TeachingProgressPanel courses={progress.courses} onManage={manageCourse} />
+      {!selectedSession && !managingCourse && <StorageNotice error={storageError} onRetry={retrySave} />}
       <div className="filters" id="filters" aria-label="تصفية الجدول">
         <div className="frow">
           <span className="flabel">الصف</span>
@@ -156,11 +174,33 @@ function TimetablePage({ onSubtitleChange }) {
       )}
       
       <TimetableGrid 
-        items={items} 
+        items={sessions}
         dimmedItems={dimmedItems} 
         today={today} 
         currentPeriod={currentPeriod}
+        onOpenSession={session => setSelectedKey(session.key)}
       />
+      {selectedSession && progress.courses[selectedSession.courseId] && <SessionDetails
+        key={selectedSession.key}
+        session={selectedSession}
+        course={progress.courses[selectedSession.courseId]}
+        onClose={() => setSelectedKey(null)}
+        onComplete={() => update(current => completeSession(current, selectedSession.key, items, new Date()))}
+        onDefer={() => update(current => deferSession(current, selectedSession.key, items, new Date()))}
+        onUndo={() => update(current => undoSession(current, selectedSession.courseId, selectedSession.key))}
+        onManage={() => manageCourse(selectedSession.courseId)}
+        storageError={storageError}
+        onRetrySave={retrySave}
+      />}
+      {managingCourse && <CourseManager
+        key={managingCourse}
+        courseId={managingCourse}
+        course={progress.courses[managingCourse]}
+        update={update}
+        onClose={() => setManagingCourse(null)}
+        storageError={storageError}
+        onRetrySave={retrySave}
+      />}
     </>
   )
 }

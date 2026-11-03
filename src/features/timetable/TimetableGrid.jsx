@@ -1,7 +1,20 @@
 import React from 'react'
 import { DAYS, PERIODS, colorClass, body, getDates } from './timetableApi.jsx'
 
-function TimetableGrid({ items, dimmedItems, today, currentPeriod }) {
+function SessionSummary({ session }) {
+  if (session.status === 'untracked') return null
+  const label = session.status === 'completed' ? '✓ تم التدريس' : session.status === 'deferred' ? 'متابعة بالحصة التالية' : session.status === 'setup' ? 'إعداد المنهج' : session.status === 'finished' ? 'مراجعة' : 'الدرس المقترح'
+  return <span className={`slot-curriculum ${session.status === 'completed' ? 'slot-complete' : ''}`} dir="rtl">
+    {session.lesson && <span className="slot-lesson-title">{!session.lesson.id.startsWith('first-') && <bdi>{session.lesson.id} · </bdi>}{session.lesson.title}</span>}
+    <span className="slot-status">{label}</span>
+  </span>
+}
+
+function sessionLabel(session) {
+  return `${session.s}، ${session.c}، ${DAYS[session.day]}، الحصة ${session.period}، ${session.lesson?.title || (session.status === 'setup' ? 'إعداد المنهج' : 'عرض تفاصيل الحصة')}`
+}
+
+function TimetableGrid({ items, dimmedItems, today, currentPeriod, onOpenSession }) {
   const dates = getDates()
   
   // Build table
@@ -78,9 +91,10 @@ function TimetableGrid({ items, dimmedItems, today, currentPeriod }) {
                         style={{ '--d': delay }}
                       >
                         <i className="live" title="الآن"></i>
-                        <div className={`slot ${isDimmed ? 'dim' : ''}`}>
+                        {it.courseId ? <button type="button" className={`slot session-button ${isDimmed ? 'dim' : ''}`} aria-label={sessionLabel(it)} onClick={() => onOpenSession(it)}>
                           {body(it)}
-                        </div>
+                          <SessionSummary session={it} />
+                        </button> : <div className={`slot ${isDimmed ? 'dim' : ''}`}>{body(it)}</div>}
                       </td>
                     )
                   })
@@ -130,12 +144,14 @@ function TimetableGrid({ items, dimmedItems, today, currentPeriod }) {
                       data-p={it.period}
                     >
                       <i className="live" title="الآن"></i>
+                      {it.courseId && <button type="button" className="mobile-session-button" aria-label={sessionLabel(it)} onClick={() => onOpenSession(it)} />}
                       <div className="when">
                         <b>{it.period}</b>
                         <span>{p ? p.t : ''}</span>
                       </div>
                       <div className={`what ${isDimmed ? 'dim' : ''}`}>
                         {body(it)}
+                        <SessionSummary session={it} />
                       </div>
                     </li>
                   )
